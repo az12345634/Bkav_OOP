@@ -20,49 +20,32 @@ import java.util.Optional;
 public class ToDoListImpl implements ToDoListService {
     @Autowired
     private ToDoListRepository toDoListRepository;
-//    @Override
-//    public BaseResponse<Page<ToDoList>> getToDoList(Integer minScore, Integer maxScore, String status, int limit) {
-//        Pageable pageable = PageRequest.of(0, limit);
-//        Page<ToDoList> toDoListPage;
-//
-//        if (status != null && !status.isEmpty() && minScore != null && maxScore != null) {
-//            toDoListPage = toDoListRepository.findByScoreBetweenAndStatus(minScore, maxScore, status, pageable);
-//        } else if (status != null && !status.isEmpty()) {
-//            toDoListPage = toDoListRepository.findByStatus(status, pageable);
-//        } else if (minScore != null && maxScore != null) {
-//            toDoListPage = toDoListRepository.findByScoreBetween(minScore, maxScore, pageable);
-//        } else {
-//            toDoListPage = toDoListRepository.findAll(pageable);
-//        }
-//
-//        return new BaseResponse<>(200, "Success", toDoListPage);
-//    }
-@Override
-public BaseResponse<Page<ToDoList>> getToDoList(Integer minScore, Integer maxScore, String status, int limit) {
-    Pageable pageable = PageRequest.of(0, limit);
-    Page<ToDoList> toDoListPage;
 
-    if (status != null && !status.isEmpty() && minScore != null && maxScore != null) {
-        toDoListPage = toDoListRepository.findByScoreBetweenAndStatus(minScore, maxScore, status, pageable);
-    } else if (status != null && !status.isEmpty()) {
-        toDoListPage = toDoListRepository.findByStatus(status, pageable);
-    } else if (minScore != null && maxScore != null) {
-        toDoListPage = toDoListRepository.findByScoreBetween(minScore, maxScore, pageable);
-    } else {
-        toDoListPage = toDoListRepository.findAll(pageable);
+    @Override
+    public BaseResponse<Page<ToDoList>> getToDoList(Integer minScore, Integer maxScore, String status, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        Page<ToDoList> toDoListPage;
+
+        if (status != null && !status.isEmpty() && minScore != null && maxScore != null) {
+            toDoListPage = toDoListRepository.findByScoreBetweenAndStatus(minScore, maxScore, status, pageable);
+        } else if (status != null && !status.isEmpty()) {
+            toDoListPage = toDoListRepository.findByStatus(status, pageable);
+        } else if (minScore != null && maxScore != null) {
+            toDoListPage = toDoListRepository.findByScoreBetween(minScore, maxScore, pageable);
+        } else {
+            toDoListPage = toDoListRepository.findAll(pageable);
+        }
+
+        // Lọc bỏ delete = true
+        List<ToDoList> filteredList = toDoListPage.getContent()
+                .stream()
+                .filter(todo -> !todo.isDelete())
+                .toList();
+
+        Page<ToDoList> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
+
+        return new BaseResponse<>(200, "Success", filteredPage);
     }
-
-    // Lọc bỏ delete = true
-    List<ToDoList> filteredList = toDoListPage.getContent()
-            .stream()
-            .filter(todo -> !todo.isDelete()) // Loại bỏ bản ghi bị xóa
-            .toList();
-
-    Page<ToDoList> filteredPage = new PageImpl<>(filteredList, pageable, filteredList.size());
-
-    return new BaseResponse<>(200, "Success", filteredPage);
-}
-
 
     @Override
     public BaseResponse<?> update(String id, ToDoList toDoList) {
