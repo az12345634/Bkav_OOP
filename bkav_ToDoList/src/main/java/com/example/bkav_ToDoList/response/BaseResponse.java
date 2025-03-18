@@ -12,6 +12,9 @@ public class BaseResponse<T> {
 
     private T data;
 
+    public BaseResponse() {
+    }
+
     public BaseResponse(int code, String message, T data) {
         this.code = code;
         this.message = message;
